@@ -5,6 +5,8 @@ import com.example.backend.service.TPostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 //Controller ekk kiyl define krne me word eken and frontend ekt return krn data json fromat ekt convert krl send krnw
 @RequestMapping("api/v1/tpost")
@@ -17,5 +19,10 @@ public class TPostController {
     public String savePost(@RequestBody TPostDTO tPostDTO) {
         String message = tPostService.savePost(tPostDTO);
         return message;
+    }
+
+    @GetMapping(path = "/post/get-all")
+    public List<TPostDTO> getAllPosts() {
+        return tPostService.getAllPosts();
     }
 }
