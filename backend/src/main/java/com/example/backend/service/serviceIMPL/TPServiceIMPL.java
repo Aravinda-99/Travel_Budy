@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class TPServiceIMPL implements TPostService {
@@ -28,5 +30,25 @@ public class TPServiceIMPL implements TPostService {
         tPostRepo.save(tPost);
 
         return "Post saved successfully!";
+    }
+
+    @Override
+    public List<TPostDTO> getAllPosts() {
+        List<TPost> tPosts = tPostRepo.findAll();
+
+        List<TPostDTO> tPostDTOs = new ArrayList<>();
+
+        for (TPost tPost : tPosts) {
+            TPostDTO tPostDTO = new TPostDTO();
+
+            tPostDTO.setTPid(tPost.getTPid());
+            tPostDTO.setTopic(tPost.getTopic());
+            tPostDTO.setDescription(tPost.getDescription());
+            tPostDTO.setCreatedAt(tPost.getCreatedAt());
+
+            tPostDTOs.add(tPostDTO);
+        }
+
+        return tPostDTOs;
     }
 }
