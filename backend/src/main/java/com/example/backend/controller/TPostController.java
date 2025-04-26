@@ -25,4 +25,10 @@ public class TPostController {
     public List<TPostDTO> getAllPosts() {
         return tPostService.getAllPosts();
     }
+
+    @PutMapping(path = "/post/update")
+    public String updatePost(@RequestBody TPostDTO tPostDTO) {
+        String message = tPostService.updatePost(tPostDTO);
+        return message;
+    }
 }

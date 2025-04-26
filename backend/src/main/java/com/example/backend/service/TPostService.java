@@ -8,4 +8,6 @@ public interface TPostService {
     String savePost(TPostDTO tPostDTO);
 
     List<TPostDTO> getAllPosts();
+
+    String updatePost(TPostDTO tPostDTO);
 }

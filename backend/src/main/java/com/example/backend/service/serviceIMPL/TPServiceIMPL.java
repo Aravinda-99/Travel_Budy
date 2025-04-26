@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TPServiceIMPL implements TPostService {
@@ -50,5 +51,30 @@ public class TPServiceIMPL implements TPostService {
         }
 
         return tPostDTOs;
+    }
+
+    @Override
+    public String updatePost(TPostDTO tPostDTO) {
+        if (tPostDTO.getTPid() == null) {
+            return "Post ID cannot be null for update operation";
+        }
+
+        // Check if post exists
+        Optional<TPost> existingPost = tPostRepo.findById(tPostDTO.getTPid());
+
+        if (existingPost.isPresent()) {
+            TPost tPost = existingPost.get();
+
+            // Update the fields
+            tPost.setTopic(tPostDTO.getTopic());
+            tPost.setDescription(tPostDTO.getDescription());
+
+            // Save the updated entity
+            tPostRepo.save(tPost);
+
+            return "Post updated successfully!";
+        } else {
+            return "Post not found with ID: " + tPostDTO.getTPid();
+        }
     }
 }
