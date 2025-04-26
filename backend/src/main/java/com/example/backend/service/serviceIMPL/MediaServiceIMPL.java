@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -50,5 +52,23 @@ public class MediaServiceIMPL implements MediaServie {
         } else {
             return "Media not found with ID: " + mediaDto.getId();
         }
+    }
+
+    @Override
+    public List<MediaDTO> getAllMedia() {
+        List<com.example.backend.entity.Media> mediaList = mediaRepo.findAll();
+        List<MediaDTO> mediaDtos = new ArrayList<>();
+
+        for (com.example.backend.entity.Media media : mediaList) {
+            MediaDTO dto = new MediaDTO();
+            dto.setId(media.getId());
+            dto.setImageUrls(media.getImageUrls());
+            dto.setDescription(media.getDescription());
+            dto.setCreatedAt(media.getCreatedAt());
+
+            mediaDtos.add(dto);
+        }
+
+        return mediaDtos;
     }
 }
