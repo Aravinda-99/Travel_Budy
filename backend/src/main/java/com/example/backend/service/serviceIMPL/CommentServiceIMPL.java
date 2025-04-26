@@ -7,6 +7,8 @@ import com.example.backend.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -45,6 +47,34 @@ public class CommentServiceIMPL implements CommentService {
             return "Comment updated successfully!";
         } else {
             return "Comment not found with ID: " + commentDto.getId();
+        }
+    }
+
+    @Override
+    public List<CommentDto> getAllComments() {
+        List<Comment> comments = commentRepo.findAll();
+        List<CommentDto> commentDtos = new ArrayList<>();
+
+        for (Comment comment : comments) {
+            CommentDto dto = new CommentDto();
+            dto.setId(comment.getId());
+            dto.setContent(comment.getContent());
+            dto.setAuthor(comment.getAuthor());
+            dto.setCreatedAt(comment.getCreatedAt());
+
+            commentDtos.add(dto);
+        }
+
+        return commentDtos;
+    }
+
+    @Override
+    public String deleteComment(Integer id) {
+        if (commentRepo.existsById(id)) {
+            commentRepo.deleteById(id);
+            return "Comment deleted successfully!";
+        } else {
+            return "No comment found with ID: " + id;
         }
     }
 }
