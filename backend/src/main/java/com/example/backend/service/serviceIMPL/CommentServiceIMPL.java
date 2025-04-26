@@ -7,6 +7,8 @@ import com.example.backend.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class CommentServiceIMPL implements CommentService {
 
@@ -19,10 +21,30 @@ public class CommentServiceIMPL implements CommentService {
 
         comment.setContent(commentDto.getContent());
         comment.setAuthor(commentDto.getAuthor());
-        comment.setCreatedAt(commentDto.getCreatedAt());
+//        comment.setCreatedAt(commentDto.getCreatedAt());
 
         commentRepo.save(comment);
 
         return "Comment saved successfully!";
+    }
+
+    @Override
+    public String updateComment(CommentDto commentDto) {
+        if (commentDto.getId() == null) {
+            return "Comment ID is required for update";
+        }
+
+        Optional<Comment> existingComment = commentRepo.findById(commentDto.getId());
+        if (existingComment.isPresent()) {
+            Comment comment = existingComment.get();
+            comment.setContent(commentDto.getContent());
+            comment.setAuthor(commentDto.getAuthor());
+            // Note: We're not updating createdAt as it's marked updatable=false in the entity
+
+            commentRepo.save(comment);
+            return "Comment updated successfully!";
+        } else {
+            return "Comment not found with ID: " + commentDto.getId();
+        }
     }
 }

@@ -20,4 +20,10 @@ public class CommentController {
         return message;
     }
 
+    @PutMapping(path = "/update")
+    public String updateComment(@RequestBody CommentDto commentDto) {
+        String message = commentService.updateComment(commentDto);
+        return message;
+    }
+
 }
