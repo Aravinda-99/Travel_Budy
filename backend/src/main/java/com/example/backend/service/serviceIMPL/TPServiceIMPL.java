@@ -77,4 +77,23 @@ public class TPServiceIMPL implements TPostService {
             return "Post not found with ID: " + tPostDTO.getTPid();
         }
     }
+
+    @Override
+    public String deletePost(Long id) {
+        if (id == null) {
+            return "Post ID cannot be null for delete operation";
+        }
+
+        // Check if post exists
+        Optional<TPost> existingPost = tPostRepo.findById(id);
+
+        if (existingPost.isPresent()) {
+            // Delete the entity
+            tPostRepo.deleteById(id);
+
+            return "Post deleted successfully!";
+        } else {
+            return "Post not found with ID: " + id;
+        }
+    }
 }
