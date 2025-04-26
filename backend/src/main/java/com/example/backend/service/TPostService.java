@@ -10,4 +10,6 @@ public interface TPostService {
     List<TPostDTO> getAllPosts();
 
     String updatePost(TPostDTO tPostDTO);
+
+    String deletePost(Long id);
 }

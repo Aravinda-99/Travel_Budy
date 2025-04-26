@@ -31,4 +31,9 @@ public class TPostController {
         String message = tPostService.updatePost(tPostDTO);
         return message;
     }
+
+    @DeleteMapping(path = "/post/delete/{id}")
+    public String deletePost(@PathVariable(value = "id") Long id) {
+        return tPostService.deletePost(id);
+    }
 }
