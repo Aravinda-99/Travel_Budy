@@ -71,4 +71,14 @@ public class MediaServiceIMPL implements MediaServie {
 
         return mediaDtos;
     }
+
+    @Override
+    public String deleteMedia(Integer id) {
+        if (mediaRepo.existsById(id)) {
+            mediaRepo.deleteById(id);
+            return "Media deleted successfully!";
+        } else {
+            return "No media found with ID: " + id;
+        }
+    }
 }

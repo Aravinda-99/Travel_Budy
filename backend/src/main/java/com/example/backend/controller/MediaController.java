@@ -34,5 +34,10 @@ public class MediaController {
         return mediaService.getAllMedia();
     }
 
+    @DeleteMapping(path = "/media/delete/{id}")
+    public String deleteMedia(@PathVariable(value = "id") Integer id) {
+        return mediaService.deleteMedia(id);
+    }
+
 
 }

@@ -10,4 +10,6 @@ public interface MediaServie {
     String updateMedia(MediaDTO mediaDto);
 
     List<MediaDTO> getAllMedia();
+
+    String deleteMedia(Integer id);
 }
