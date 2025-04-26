@@ -1,0 +1,23 @@
+package com.example.backend.controller;
+
+import com.example.backend.dto.CommentDto;
+import com.example.backend.service.CommentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+//Controller ekk kiyl define krne me word eken and frontend ekt return krn data json fromat ekt convert krl send krnw
+@RequestMapping("api/v1/comment")
+@CrossOrigin //Security Perpose walata use krnne
+public class CommentController {
+
+    @Autowired
+    private CommentService commentService;
+
+    @PostMapping(path = "/save")
+    public String saveComment(@RequestBody CommentDto commentDto) {
+        String message = commentService.saveComment(commentDto);
+        return message;
+    }
+
+}
