@@ -21,5 +21,11 @@ public class MediaController {
         return message;
     }
 
+    @PutMapping(path = "/media/update")
+    public String updateMedia(@RequestBody MediaDTO mediaDto) {
+        String message = mediaService.updateMedia(mediaDto);
+        return message;
+    }
+
 
 }
