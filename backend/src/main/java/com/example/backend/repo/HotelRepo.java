@@ -1,4 +1,4 @@
 package com.example.backend.repo;
 
-public interface HotelRepo {
+public interface HotelRepo  {
 }
