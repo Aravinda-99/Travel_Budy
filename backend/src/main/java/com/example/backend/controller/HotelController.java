@@ -20,11 +20,7 @@ public class HotelController {
     @Autowired
     private HotelService hotelService;
 
-//    @PostMapping(path = "/save")
-//    public String saveHotel(@RequestBody HotelDTO hotelDTO) {
-//        String message = hotelService.saveHotel(hotelDTO);
-//        return message;
-//    }
+
 
     @PostMapping("/save")
     public ResponseEntity<StandradResponse> saveHotel(@RequestBody HotelDTO hotelDTO) {
@@ -38,11 +34,6 @@ public class HotelController {
         return response;
     }
 
-//    @PutMapping(path = "/update")
-//    public String updateHotel(@RequestBody HotelDTO hotelDTO) {
-//        String message = hotelService.updateHotel(hotelDTO);
-//        return message;
-//    }
 
 
     @PutMapping("/update")
@@ -55,11 +46,7 @@ public class HotelController {
         return response;
     }
 
-//    @GetMapping(path = "/get-all-hotel")
-//    public List<HotelDTO> getAllHotels() {
-//        List<HotelDTO> allHotels = hotelService.getAllHotels();
-//        return allHotels;
-//    }
+
 
     @GetMapping("/get-all-hotel")
     public ResponseEntity<StandradResponse> getAllHotels() {
@@ -72,11 +59,7 @@ public class HotelController {
         return response;
     }
 
-//    @DeleteMapping(path = "/delete-hotel/{id}")
-//    public String deleteHotel(@PathVariable(value = "id") Integer hotelId) {
-//        String message = hotelService.deleteHotel(hotelId);
-//        return message;
-//    }
+
     @DeleteMapping("/delete-hotel/{id}")
     public ResponseEntity<StandradResponse> deleteHotel(@PathVariable(value = "id") Integer hotelId) {
         String message = hotelService.deleteHotel(hotelId);
