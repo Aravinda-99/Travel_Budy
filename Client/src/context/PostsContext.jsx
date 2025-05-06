@@ -228,11 +228,48 @@ export const PostsProvider = ({ children }) => {
     }));
   };
 
+  // Update a comment
+  const updateComment = (postId, commentId, newText) => {
+    setPosts(posts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          comments: post.comments.map(comment => {
+            if (comment.id === commentId) {
+              return {
+                ...comment,
+                text: newText,
+                edited: true
+              };
+            }
+            return comment;
+          })
+        };
+      }
+      return post;
+    }));
+  };
+
+  // Delete a comment
+  const deleteComment = (postId, commentId) => {
+    setPosts(posts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          comments: post.comments.filter(comment => comment.id !== commentId)
+        };
+      }
+      return post;
+    }));
+  };
+
   // Provider value
   const value = {
     posts,
     addPost,
     addComment,
+    updateComment,
+    deleteComment,
     toggleLike
   };
 
