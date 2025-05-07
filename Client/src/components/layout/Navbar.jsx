@@ -26,7 +26,7 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Feed', path: '/feed' },
-    { name: 'Recommendation', path: '/Recommendation' },
+    { name: 'Recommendation', path: '/RecommendationPage' },
     { name: 'Itinerary Hub', path: '/itineraryhub' },
   ];
 

@@ -6,6 +6,7 @@ import FeedPage from './pages/FeedPage';
 import Footer from './components/layout/Footer';
 import ItineraryPage from './pages/ItineraryPage';
 import { PostsProvider } from './context/PostsContext';
+import RecommendationPage from './pages/recommendation/RecommendationPage.jsx'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/feed" element={<FeedPage />} />
             <Route path="/itineraryhub" element={<ItineraryPage />} />
+            <Route path="/RecommendationPage" element={<RecommendationPage />} />
           </Routes>
         </main>
         <Footer />
