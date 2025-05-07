@@ -88,7 +88,7 @@ const HotelCard = ({ hotel }) => {
           href={hotel.affiliateBookingLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-300"
+          className="mt-2 w-full flex items-center justify-center px-4 py-2 btn-primary text-white rounded-md  transition-colors duration-300"
         >
           <span>Book Now</span>
           <ExternalLink className="h-4 w-4 ml-2" />

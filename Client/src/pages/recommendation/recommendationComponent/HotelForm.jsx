@@ -308,7 +308,7 @@ const HotelForm = ({ onSubmit, onCancel }) => {
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+            className="px-6 py-2 btn-primary text-white rounded-md  transition-colors shadow-sm"
           >
             Submit Recommendation
           </button>
