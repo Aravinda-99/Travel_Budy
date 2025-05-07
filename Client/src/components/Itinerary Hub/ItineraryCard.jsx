@@ -60,10 +60,8 @@ function SmartDescriptionCard({
           </div>
 
           <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-1 text-sm">
-            <span>Details</span>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
+            <span>Edit</span>
+           
           </button>
         </div>
       </div>
