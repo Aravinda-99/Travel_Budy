@@ -1,67 +1,11 @@
 import React, { useState } from 'react';
 import ItineraryForm from '../components/Itinerary Hub/ItineraryForm';
+import ItineraryCard from '../components/Itinerary Hub/ItineraryCard';
+import ItinerarySideebar from '../components/Itinerary Hub/ItinerarySideebar';
+import SmartDescriptionCard from '../components/Itinerary Hub/SmartDescriptionCard'; // Assuming SmartDescriptionCard is in the same directory
 
 const ItineraryPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const pageStyle = {
-    minHeight: '100vh',
-    padding: '2rem',
-    backgroundColor: '#f5f5f5',
-    position: 'relative'
-  };
-
-  const addButtonStyle = {
-    position: 'fixed',
-    bottom: '2rem',
-    right: '2rem',
-    width: '60px',
-    height: '60px',
-    borderRadius: '50%',
-    backgroundColor: '#4a90e2',
-    color: 'white',
-    border: 'none',
-    fontSize: '2rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
-    transition: 'transform 0.2s ease, background-color 0.2s ease'
-  };
-
-  const modalOverlayStyle = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: isModalOpen ? 'flex' : 'none',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000
-  };
-
-  const modalContentStyle = {
-    position: 'relative',
-    width: '100%',
-    maxWidth: '600px',
-    margin: '2rem',
-    zIndex: 1001
-  };
-
-  const closeButtonStyle = {
-    position: 'absolute',
-    top: '-40px',
-    right: '0',
-    background: 'none',
-    border: 'none',
-    color: 'white',
-    fontSize: '1.5rem',
-    cursor: 'pointer',
-    padding: '0.5rem'
-  };
 
   const handleAddClick = () => {
     setIsModalOpen(true);
@@ -71,33 +15,58 @@ const ItineraryPage = () => {
     setIsModalOpen(false);
   };
 
-  const handleButtonHover = (e) => {
-    e.target.style.transform = 'scale(1.1)';
-    e.target.style.backgroundColor = '#357abd';
-  };
-
-  const handleButtonLeave = (e) => {
-    e.target.style.transform = 'scale(1)';
-    e.target.style.backgroundColor = '#4a90e2';
-  };
-
   return (
-    <div style={pageStyle}>
+    <div className="min-h-screen p-8 pt-24 bg-gray-100 relative flex">
+      {/* Sidebar Section */}
+      <div className="w-full md:w-1/4 lg:w-1/5 pr-8">
+        <ItinerarySideebar />
+      </div>
+
+      {/* Main Content Section */}
+      <div className="flex-grow">
+        {/* SmartDescriptionCard */}
+        <div className="mb-8">
+          <SmartDescriptionCard
+            title="Paris Adventure"
+            description="Explore the city of love with this amazing 5-day itinerary covering all major attractions including the Eiffel Tower, Louvre Museum, and Notre-Dame Cathedral."
+            duration="5 days"
+            date="June 15-20, 2024"
+            location="Paris, France"
+            tags={["Travel", "Europe", "City Tour"]}
+          />
+        </div>
+
+        {/* Itinerary Cards (if you still need them) */}
+        {/* <ItineraryCard />
+        <ItineraryCard /> */}
+        {/* Add more ItineraryCard components as needed */}
+      </div>
+
+      {/* Floating Add Button */}
       <button
-        style={addButtonStyle}
+        className="fixed bottom-8 right-8 w-[60px] h-[60px] rounded-full bg-blue-500 text-white border-none text-3xl flex items-center justify-center cursor-pointer shadow-lg transition-transform duration-200 hover:scale-110 hover:bg-blue-600 z-40"
         onClick={handleAddClick}
-        onMouseEnter={handleButtonHover}
-        onMouseLeave={handleButtonLeave}
       >
         +
       </button>
 
-      <div style={modalOverlayStyle} onClick={handleCloseModal}>
-        <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
-          <button style={closeButtonStyle} onClick={handleCloseModal}>
+      {/* Modal for Adding Itinerary */}
+      <div
+        className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${isModalOpen ? 'flex' : 'hidden'}`}
+        onClick={handleCloseModal}
+      >
+        <div
+          className="relative w-full max-w-[600px] m-8 z-50 bg-white rounded-lg shadow-xl p-6"
+          onClick={e => e.stopPropagation()}
+        >
+          <button
+            className="absolute -top-4 right-0 bg-transparent border-none text-gray-600 text-3xl cursor-pointer p-2"
+            onClick={handleCloseModal}
+          >
             ✕
           </button>
-          <ItineraryForm />
+          <h2 className="text-xl font-semibold mb-4">Create New Itinerary</h2>
+          <ItineraryForm onClose={handleCloseModal} /> {/* Pass onClose to handle modal closing from the form */}
         </div>
       </div>
     </div>
