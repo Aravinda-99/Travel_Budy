@@ -27,7 +27,7 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'Feed', path: '/feed' },
     { name: 'Explore', path: '/explore' },
-    { name: 'Destinations', path: '/destinations' },
+    { name: 'Itinerary Hub', path: '/itineraryhub' },
   ];
 
   const isActive = (path) => location.pathname === path;
