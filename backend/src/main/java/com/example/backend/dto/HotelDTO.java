@@ -27,6 +27,8 @@ public class HotelDTO {
     private Double userRating;
     private String affiliateBookingLink;
 
+    private String image;
+
     // Convenience methods
     public void addAmenity(String amenity) {
         this.amenities.add(amenity);
