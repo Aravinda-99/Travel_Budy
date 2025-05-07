@@ -17,6 +17,23 @@ public class HotelServiceIMPL implements HotelService {
     private HotelRepo hotelRepo;
 
 
+//    @Override
+//    public String saveHotel(HotelDTO hotelDTO) {
+//        Hotel hotel = new Hotel();
+//
+//        hotel.setName(hotelDTO.getName());
+//        hotel.setCity(hotelDTO.getCity());
+//        hotel.setCountry(hotelDTO.getCountry());
+//        hotel.setPriceRange(hotelDTO.getPriceRange());
+//        hotel.setAmenities(hotelDTO.getAmenities());
+//        hotel.setUserRating(hotelDTO.getUserRating());
+//        hotel.setAffiliateBookingLink(hotelDTO.getAffiliateBookingLink());
+//
+//        hotelRepo.save(hotel);
+//
+//        return "Hotel saved successfully!";
+//    }
+
     @Override
     public String saveHotel(HotelDTO hotelDTO) {
         Hotel hotel = new Hotel();
@@ -28,15 +45,41 @@ public class HotelServiceIMPL implements HotelService {
         hotel.setAmenities(hotelDTO.getAmenities());
         hotel.setUserRating(hotelDTO.getUserRating());
         hotel.setAffiliateBookingLink(hotelDTO.getAffiliateBookingLink());
+        hotel.setImage(hotelDTO.getImage()); // Added mapping for image field
 
         hotelRepo.save(hotel);
 
         return "Hotel saved successfully!";
     }
 
+//    @Override
+//    public String updateHotel(HotelDTO hotelDTO) {
+//        if (hotelDTO.getId() == null) {
+//            return "Hotel ID cannot be null for update operation";
+//        }
+//
+//        if (!hotelRepo.existsById(hotelDTO.getId())) {
+//            return "Hotel not found with ID: " + hotelDTO.getId();
+//        }
+//
+//        Hotel hotel = hotelRepo.findById(hotelDTO.getId()).get();
+//
+//        hotel.setName(hotelDTO.getName());
+//        hotel.setCity(hotelDTO.getCity());
+//        hotel.setCountry(hotelDTO.getCountry());
+//        hotel.setPriceRange(hotelDTO.getPriceRange());
+//        hotel.setAmenities(hotelDTO.getAmenities());
+//        hotel.setUserRating(hotelDTO.getUserRating());
+//        hotel.setAffiliateBookingLink(hotelDTO.getAffiliateBookingLink());
+//
+//        hotelRepo.save(hotel);
+//
+//        return "Hotel updated successfully!";
+//    }
+
     @Override
     public String updateHotel(HotelDTO hotelDTO) {
-        if (hotelDTO.getId() == null) {
+        if (hotelDTO == null || hotelDTO.getId() == null) {
             return "Hotel ID cannot be null for update operation";
         }
 
@@ -44,7 +87,8 @@ public class HotelServiceIMPL implements HotelService {
             return "Hotel not found with ID: " + hotelDTO.getId();
         }
 
-        Hotel hotel = hotelRepo.findById(hotelDTO.getId()).get();
+        Hotel hotel = hotelRepo.findById(hotelDTO.getId())
+                .orElseThrow(() -> new IllegalStateException("Hotel not found with ID: " + hotelDTO.getId()));
 
         hotel.setName(hotelDTO.getName());
         hotel.setCity(hotelDTO.getCity());
@@ -53,11 +97,35 @@ public class HotelServiceIMPL implements HotelService {
         hotel.setAmenities(hotelDTO.getAmenities());
         hotel.setUserRating(hotelDTO.getUserRating());
         hotel.setAffiliateBookingLink(hotelDTO.getAffiliateBookingLink());
+        hotel.setImage(hotelDTO.getImage()); // Added mapping for image field
 
         hotelRepo.save(hotel);
 
         return "Hotel updated successfully!";
     }
+
+//    @Override
+//    public List<HotelDTO> getAllHotels() {
+//        List<Hotel> hotels = hotelRepo.findAll();
+//        List<HotelDTO> hotelDTOs = new ArrayList<>();
+//
+//        for (Hotel hotel : hotels) {
+//            HotelDTO hotelDTO = new HotelDTO();
+//
+//            hotelDTO.setId(hotel.getId());
+//            hotelDTO.setName(hotel.getName());
+//            hotelDTO.setCity(hotel.getCity());
+//            hotelDTO.setCountry(hotel.getCountry());
+//            hotelDTO.setPriceRange(hotel.getPriceRange());
+//            hotelDTO.setAmenities(hotel.getAmenities());
+//            hotelDTO.setUserRating(hotel.getUserRating());
+//            hotelDTO.setAffiliateBookingLink(hotel.getAffiliateBookingLink());
+//
+//            hotelDTOs.add(hotelDTO);
+//        }
+//
+//        return hotelDTOs;
+//    }
 
     @Override
     public List<HotelDTO> getAllHotels() {
@@ -66,7 +134,6 @@ public class HotelServiceIMPL implements HotelService {
 
         for (Hotel hotel : hotels) {
             HotelDTO hotelDTO = new HotelDTO();
-
             hotelDTO.setId(hotel.getId());
             hotelDTO.setName(hotel.getName());
             hotelDTO.setCity(hotel.getCity());
@@ -75,7 +142,7 @@ public class HotelServiceIMPL implements HotelService {
             hotelDTO.setAmenities(hotel.getAmenities());
             hotelDTO.setUserRating(hotel.getUserRating());
             hotelDTO.setAffiliateBookingLink(hotel.getAffiliateBookingLink());
-
+            hotelDTO.setImage(hotel.getImage()); // Added mapping for image field
             hotelDTOs.add(hotelDTO);
         }
 
