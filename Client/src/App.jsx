@@ -4,6 +4,7 @@ import Navbar from './components/layout/Navbar';
 import HomePage from './pages/HomePage';
 import FeedPage from './pages/FeedPage';
 import Footer from './components/layout/Footer';
+import ItineraryPage from './pages/ItineraryPage';
 import { PostsProvider } from './context/PostsContext';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/feed" element={<FeedPage />} />
+            <Route path="/itineraryhub" element={<ItineraryPage />} />
           </Routes>
         </main>
         <Footer />
