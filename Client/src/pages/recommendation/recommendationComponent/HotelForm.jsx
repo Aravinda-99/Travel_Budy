@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Image as ImageIcon, Star, Check } from 'lucide-react';
+import axios from 'axios';
 
 const amenitiesOptions = [
   { value: 'WiFi', label: 'WiFi' },
@@ -18,18 +19,18 @@ const amenitiesOptions = [
 
 const HotelForm = ({ onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
-    id: Date.now().toString(),
-    userRating: 5,
-    amenities: [],
     name: '',
     city: '',
     country: '',
     priceRange: '',
-    image: '',
+    amenities: [],
+    userRating: 5,
     affiliateBookingLink: '',
+    image: '',
   });
   const [imagePreview, setImagePreview] = useState('');
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -99,15 +100,52 @@ const HotelForm = ({ onSubmit, onCancel }) => {
     if (!formData.affiliateBookingLink) newErrors.affiliateBookingLink = 'Booking link is required';
     if ((formData.amenities || []).length === 0) newErrors.amenities = 'Select at least one amenity';
 
+    // Add URL length validation
+    if (formData.affiliateBookingLink && formData.affiliateBookingLink.length > 255) {
+      newErrors.affiliateBookingLink = 'Booking link must be less than 255 characters';
+    }
+    if (formData.image && formData.image.length > 255) {
+      newErrors.image = 'Image URL must be less than 255 characters';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (validateForm()) {
-      onSubmit(formData);
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Convert price range to match backend enum
+      const priceRangeMap = {
+        'BUDGET': 'BUDGET',
+        'MID_RANGE': 'MID_RANGE',
+        'LUXURY': 'LUXURY'
+      };
+
+      const hotelData = {
+        ...formData,
+        priceRange: priceRangeMap[formData.priceRange],
+        userRating: Number(formData.userRating)
+      };
+
+      const response = await axios.post('http://localhost:8093/api/v1/hotel/save', hotelData);
+      
+      if (response.data.code === 201) {
+        onSubmit(hotelData);
+      } else {
+        setErrors({ submit: 'Failed to save hotel. Please try again.' });
+      }
+    } catch (error) {
+      setErrors({ submit: error.response?.data?.message || 'An error occurred while saving the hotel.' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -187,10 +225,9 @@ const HotelForm = ({ onSubmit, onCancel }) => {
               className={`w-full px-3 py-2 border ${errors.priceRange ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
             >
               <option value="">Select price range</option>
-              <option value="$">$ (Budget)</option>
-              <option value="$$">$$ (Moderate)</option>
-              <option value="$$$">$$$ (Luxury)</option>
-              <option value="$$$$">$$$$ (Ultra Luxury)</option>
+              <option value="BUDGET">Budget</option>
+              <option value="MID_RANGE">Mid Range</option>
+              <option value="LUXURY">Luxury</option>
             </select>
             {errors.priceRange && <p className="mt-1 text-sm text-red-500">{errors.priceRange}</p>}
           </div>
@@ -298,19 +335,27 @@ const HotelForm = ({ onSubmit, onCancel }) => {
           </div>
         </div>
 
+        {errors.submit && (
+          <div className="md:col-span-2">
+            <p className="text-sm text-red-500">{errors.submit}</p>
+          </div>
+        )}
+
         <div className="md:col-span-2 pt-4 border-t border-gray-200 flex justify-end gap-3">
           <button
             type="button"
             onClick={onCancel}
             className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            disabled={isSubmitting}
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-6 py-2 btn-primary text-white rounded-md  transition-colors shadow-sm"
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSubmitting}
           >
-            Submit Recommendation
+            {isSubmitting ? 'Submitting...' : 'Submit Recommendation'}
           </button>
         </div>
       </form>

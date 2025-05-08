@@ -7,6 +7,7 @@ import Footer from './components/layout/Footer';
 import ItineraryPage from './pages/ItineraryPage';
 import { PostsProvider } from './context/PostsContext';
 import RecommendationPage from './pages/recommendation/RecommendationPage.jsx'
+import UserProfilePage from './pages/Profile/UserProfilePage.jsx'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/feed" element={<FeedPage />} />
             <Route path="/itineraryhub" element={<ItineraryPage />} />
             <Route path="/RecommendationPage" element={<RecommendationPage />} />
+            <Route path="/UserProfilePage" element={<UserProfilePage />} />
           </Routes>
         </main>
         <Footer />

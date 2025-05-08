@@ -32,17 +32,17 @@ export const initialHotels = [
       userRating: 4,
       affiliateBookingLink: 'https://example.com/book-urban-boutique'
     },
-    {
-      id: '4',
-      name: 'Urban Boutique Hotel',
-      image: 'https://images.pexels.com/photos/1838554/pexels-photo-1838554.jpeg',
-      city: 'London',
-      country: 'UK',
-      priceRange: '$$',
-      amenities: ['WiFi', 'Breakfast', 'Bar', '24hr Reception'],
-      userRating: 4,
-      affiliateBookingLink: 'https://example.com/book-urban-boutique'
-    },
+    // {
+    //   id: '4',
+    //   name: 'Urban Boutique Hotel',
+    //   image: 'https://images.pexels.com/photos/1838554/pexels-photo-1838554.jpeg',
+    //   city: 'London',
+    //   country: 'UK',
+    //   priceRange: '$$',
+    //   amenities: ['WiFi', 'Breakfast', 'Bar', '24hr Reception'],
+    //   userRating: 4,
+    //   affiliateBookingLink: 'https://example.com/book-urban-boutique'
+    // },
     {
       id: '5',
       name: 'Mountain View Lodge',
