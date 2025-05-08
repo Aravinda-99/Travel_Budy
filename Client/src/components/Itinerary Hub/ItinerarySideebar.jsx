@@ -37,7 +37,7 @@ const ItinerarySideebar = () => {
             </div>
           </div>
 
-          <Link to="/profile" className="mt-3 w-full btn btn-outline py-1.5">
+          <Link to="/UserProfilePage" className="mt-3 w-full btn btn-outline py-1.5">
             View Profile
           </Link>
         </div>
