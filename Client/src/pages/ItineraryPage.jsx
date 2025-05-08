@@ -3,6 +3,7 @@ import ItineraryForm from '../components/Itinerary Hub/ItineraryForm';
 import ItineraryCard from '../components/Itinerary Hub/ItineraryCard';
 import ItinerarySideebar from '../components/Itinerary Hub/ItinerarySideebar';
 
+
 const ItineraryPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
