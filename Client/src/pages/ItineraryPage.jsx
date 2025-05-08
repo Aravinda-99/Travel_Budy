@@ -24,21 +24,9 @@ const ItineraryPage = () => {
 
       {/* Main Content Section */}
       <div className="flex-grow">
-        {/* SmartDescriptionCard */}
-        <div className="mb-8">
-          <SmartDescriptionCard
-            title="Paris Adventure"
-            description="Explore the city of love with this amazing 5-day itinerary covering all major attractions including the Eiffel Tower, Louvre Museum, and Notre-Dame Cathedral."
-            duration="5 days"
-            date="June 15-20, 2024"
-            location="Paris, France"
-            tags={["Travel", "Europe", "City Tour"]}
-          />
-        </div>
-
-        {/* Itinerary Cards (if you still need them) */}
-        {/* <ItineraryCard />
-        <ItineraryCard /> */}
+        {/* Itinerary Cards will go here */}
+      
+        <ItineraryCard />
         {/* Add more ItineraryCard components as needed */}
       </div>
 
