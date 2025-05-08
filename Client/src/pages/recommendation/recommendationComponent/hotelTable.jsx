@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { FiStar, FiMapPin, FiExternalLink, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 import { FaWifi, FaSwimmingPool, FaParking, FaUtensils, FaTv, FaSnowflake, FaSpa, FaDumbbell, FaGlassMartiniAlt, FaConciergeBell, FaPlane, FaCoffee, FaPaw, FaUmbrellaBeach } from 'react-icons/fa';
 import axios from 'axios';
+import HotelUpdateForm from './HotelUpdateForm';
+import HotelForm from './HotelForm';
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -11,11 +13,13 @@ const api = axios.create({
   },
 });
 
-const HotelTable = ({ onAdd }) => {
+const HotelTable = () => {
   const [hotels, setHotels] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editingHotelId, setEditingHotelId] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   // Fetch hotels on component mount
   useEffect(() => {
@@ -38,16 +42,24 @@ const HotelTable = ({ onAdd }) => {
     }
   };
 
-  const handleEdit = async (id) => {
+  const handleEdit = (id) => {
+    setEditingHotelId(id);
+  };
+
+  const handleUpdate = async (updatedHotel) => {
     try {
-      const hotelToEdit = hotels.find(hotel => hotel.id === id);
-      if (hotelToEdit) {
-        // You can implement your edit logic here
-        // For example, open a modal or navigate to edit page
-        console.log('Edit hotel:', hotelToEdit);
+      const response = await api.put('/api/v1/hotel/update', updatedHotel);
+      if (response.data.code === 200) {
+        // Update the hotel in the state
+        setHotels(hotels.map(hotel => 
+          hotel.id === updatedHotel.id ? { ...hotel, ...updatedHotel } : hotel
+        ));
+        setEditingHotelId(null); // Close the edit form
+      } else {
+        setError('Failed to update hotel');
       }
     } catch (error) {
-      setError('Error preparing hotel for edit');
+      setError(error.response?.data?.message || 'Error updating hotel');
     }
   };
 
@@ -65,19 +77,18 @@ const HotelTable = ({ onAdd }) => {
     }
   };
 
-  const handleUpdate = async (hotelData) => {
+  const handleAdd = async (newHotel) => {
     try {
-      const response = await api.put('/api/v1/hotel/update', hotelData);
-      if (response.data.code === 200) {
-        // Update the hotel in the state
-        setHotels(hotels.map(hotel => 
-          hotel.id === hotelData.id ? { ...hotel, ...hotelData } : hotel
-        ));
+      const response = await api.post('/api/v1/hotel/save', newHotel);
+      if (response.data.code === 201) {
+        // Add the new hotel to the state
+        setHotels([...hotels, response.data.data]);
+        setShowAddForm(false); // Close the add form
       } else {
-        setError('Failed to update hotel');
+        setError('Failed to add hotel');
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Error updating hotel');
+      setError(error.response?.data?.message || 'Error adding hotel');
     }
   };
 
@@ -175,12 +186,33 @@ const HotelTable = ({ onAdd }) => {
     );
   }
 
+  // If we're editing a hotel, show the update form
+  if (editingHotelId) {
+    return (
+      <HotelUpdateForm
+        hotelId={editingHotelId}
+        onUpdate={handleUpdate}
+        onCancel={() => setEditingHotelId(null)}
+      />
+    );
+  }
+
+  // If we're adding a new hotel, show the add form
+  if (showAddForm) {
+    return (
+      <HotelForm
+        onSubmit={handleAdd}
+        onCancel={() => setShowAddForm(false)}
+      />
+    );
+  }
+
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       <div className="flex justify-between items-center p-4 border-b">
         <h2 className="text-xl font-semibold text-gray-800">Hotel List</h2>
         <button
-          onClick={onAdd}
+          onClick={() => setShowAddForm(true)}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
         >
           <FiPlus size={18} />
