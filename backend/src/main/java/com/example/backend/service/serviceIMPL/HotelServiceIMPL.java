@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class HotelServiceIMPL implements HotelService {
@@ -147,6 +148,29 @@ public class HotelServiceIMPL implements HotelService {
         }
 
         return hotelDTOs;
+    }
+
+    @Override
+    public HotelDTO getHotelById(Integer hotelId) {
+        Optional<Hotel> hotelOptional = hotelRepo.findById(hotelId);
+
+        if (hotelOptional.isEmpty()) {
+            throw new RuntimeException("Hotel not found with ID: " + hotelId);
+        }
+
+        Hotel hotel = hotelOptional.get();
+        HotelDTO hotelDTO = new HotelDTO();
+        hotelDTO.setId(hotel.getId());
+        hotelDTO.setName(hotel.getName());
+        hotelDTO.setCity(hotel.getCity());
+        hotelDTO.setCountry(hotel.getCountry());
+        hotelDTO.setPriceRange(hotel.getPriceRange());
+        hotelDTO.setAmenities(hotel.getAmenities());
+        hotelDTO.setUserRating(hotel.getUserRating());
+        hotelDTO.setAffiliateBookingLink(hotel.getAffiliateBookingLink());
+        hotelDTO.setImage(hotel.getImage());
+
+        return hotelDTO;
     }
 
     @Override
