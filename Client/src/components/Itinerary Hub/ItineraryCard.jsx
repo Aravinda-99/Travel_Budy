@@ -1,19 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
+import ItineraryUpdateForm from '../Itinerary Hub/ItineraryUpdateForm'; // Assuming ItineraryUpdateForm is in the same directory
 
-function SmartDescriptionCard({
+function ItineraryCard({
   title = "Paris Adventure",
   description = "Explore the city of love with this amazing 5-day itinerary covering all major attractions including the Eiffel Tower, Louvre Museum, and Notre-Dame Cathedral.",
   duration = "5 days",
   date = "June 15-20, 2024",
   location = "Paris, France",
-  tags = ["Travel", "Europe", "City Tour"]
+  tags = ["Travel", "Europe", "City Tour"],
+  id // Assuming each card has a unique ID for updating
 }) {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleUpdate = (updatedData) => {
+    // Here you would typically make an API call to update the data
+    console.log('Updated data:', updatedData);
+    setIsEditing(false); // After successful update, go back to card view
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <ItineraryUpdateForm
+        initialData={{ title, description, duration, date, location, tags }}
+        onUpdate={handleUpdate}
+        onCancel={handleCancelEdit}
+      />
+    );
+  }
+
   return (
     <div
       className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100"
       style={{
-        maxWidth: '500px', // Adjust this value as needed
-        width: '100%',       // Ensure it scales within its container
+        maxWidth: '500px',
+        width: '100%',
       }}
     >
       <div className="p-6">
@@ -59,9 +87,11 @@ function SmartDescriptionCard({
             ))}
           </div>
 
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-1 text-sm">
+          <button
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-1 text-sm"
+            onClick={handleEditClick}
+          >
             <span>Edit</span>
-           
           </button>
         </div>
       </div>
@@ -69,4 +99,4 @@ function SmartDescriptionCard({
   );
 }
 
-export default SmartDescriptionCard;
+export default ItineraryCard;
