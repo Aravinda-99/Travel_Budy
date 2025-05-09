@@ -8,6 +8,7 @@ import ItineraryPage from './pages/ItineraryPage';
 import { PostsProvider } from './context/PostsContext';
 import RecommendationPage from './pages/recommendation/RecommendationPage.jsx'
 import UserProfilePage from './pages/Profile/UserProfilePage.jsx'
+import  Login from '../src/pages/Login/Login.jsx'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/itineraryhub" element={<ItineraryPage />} />
             <Route path="/RecommendationPage" element={<RecommendationPage />} />
             <Route path="/UserProfilePage" element={<UserProfilePage />} />
+            <Route path="/Login" element={<Login />} />
           </Routes>
         </main>
         <Footer />
