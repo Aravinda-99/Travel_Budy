@@ -59,6 +59,15 @@ public class HotelController {
         return response;
     }
 
+    @GetMapping("/get-hotel/{hotelId}")
+    public ResponseEntity<StandradResponse> getHotelById(@PathVariable Integer hotelId) {
+        HotelDTO hotel = hotelService.getHotelById(hotelId);
+        ResponseEntity<StandradResponse> response = new ResponseEntity<StandradResponse>(
+                new StandradResponse(200, "Success", hotel), HttpStatus.OK
+        );
+        return response;
+    }
+
 
     @DeleteMapping("/delete-hotel/{id}")
     public ResponseEntity<StandradResponse> deleteHotel(@PathVariable(value = "id") Integer hotelId) {
