@@ -2,13 +2,18 @@ import React, { useState } from 'react';
 import { ImagePlus, MapPin, Smile, X } from 'lucide-react';
 import UserAvatar from '../shared/UserAvatar';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:8093/api';
 
 const CreatePostCard = ({ onCreatePost }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imageUrl, setImageUrl] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleFocus = () => {
     setIsExpanded(true);
@@ -19,48 +24,65 @@ const CreatePostCard = ({ onCreatePost }) => {
     setContent('');
     setTitle('');
     setLocation('');
-    setImagePreview(null);
+    setImageUrl('');
+    setError(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!content.trim()) return;
     
-    // Create new post object
-    const newPost = {
-      id: Date.now().toString(),
-      title: title.trim() || null,
-      description: content,
-      location: location.trim() || null,
-      imageUrl: imagePreview,
-      createdAt: new Date().toISOString(),
-      author: {
-        name: 'You',
-        avatarUrl: null, // Will use default avatar
-        status: 'online'
-      },
-      likes: 0,
-      comments: []
-    };
-    
-    onCreatePost(newPost);
-    handleCancel();
-  };
+    setIsSubmitting(true);
+    setError(null);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImagePreview(event.target.result);
+    try {
+      // Create media data object matching backend DTO exactly
+      const mediaData = {
+        id: null,
+        title: title.trim() || null,
+        location: location.trim() || null,
+        imageUrls: imageUrl ? [imageUrl] : [], // Send as simple array
+        description: content,
+        createdAt: new Date().toISOString()
       };
-      reader.readAsDataURL(file);
+
+      // Send to backend
+      await axios.post(`${API_BASE_URL}/media/save`, mediaData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // Create local post object for UI
+      const newPost = {
+        id: Date.now().toString(),
+        title: title.trim() || null,
+        description: content,
+        location: location.trim() || null,
+        imageUrl: imageUrl,
+        createdAt: new Date().toISOString(),
+        author: {
+          name: 'You',
+          avatarUrl: null,
+          status: 'online'
+        },
+        likes: 0,
+        comments: []
+      };
+      
+      onCreatePost(newPost);
+      handleCancel();
+    } catch (err) {
+      setError('Failed to create post. Please try again.');
+      console.error('Error creating post:', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const removeImage = () => {
-    setImagePreview(null);
+    setImageUrl('');
   };
 
   return (
@@ -70,6 +92,12 @@ const CreatePostCard = ({ onCreatePost }) => {
           <UserAvatar status="online" />
           <h3 className="text-lg font-semibold text-gray-900">Create Post</h3>
         </div>
+
+        {error && (
+          <div className="mb-3 p-2 bg-red-100 text-red-700 rounded">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <AnimatePresence>
@@ -98,6 +126,17 @@ const CreatePostCard = ({ onCreatePost }) => {
                     className="input h-9 w-full"
                   />
                 </div>
+
+                <div className="flex items-center gap-2 mb-3">
+                  <ImagePlus size={18} className="text-gray-500" />
+                  <input
+                    type="text"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="Enter image URL"
+                    className="input h-9 w-full"
+                  />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -113,9 +152,9 @@ const CreatePostCard = ({ onCreatePost }) => {
             />
           </div>
 
-          {imagePreview && (
+          {imageUrl && (
             <div className="relative mb-3 rounded-lg overflow-hidden">
-              <img src={imagePreview} alt="Preview" className="w-full max-h-[300px] object-cover" />
+              <img src={imageUrl} alt="Preview" className="w-full max-h-[300px] object-cover" />
               <button
                 type="button"
                 onClick={removeImage}
@@ -128,15 +167,6 @@ const CreatePostCard = ({ onCreatePost }) => {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <label className="cursor-pointer p-2 rounded-full hover:bg-gray-100 text-gray-600">
-                <ImagePlus size={20} />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-              </label>
               <button
                 type="button"
                 className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
@@ -157,15 +187,16 @@ const CreatePostCard = ({ onCreatePost }) => {
                     type="button"
                     onClick={handleCancel}
                     className="btn btn-outline py-1.5 px-4"
+                    disabled={isSubmitting}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    disabled={!content.trim()}
+                    disabled={!content.trim() || isSubmitting}
                     className="btn btn-primary py-1.5 px-4 disabled:opacity-50"
                   >
-                    Post
+                    {isSubmitting ? 'Posting...' : 'Post'}
                   </button>
                 </motion.div>
               )}

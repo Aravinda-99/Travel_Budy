@@ -11,25 +11,25 @@ import java.util.List;
 @RestController
 //Controller ekk kiyl define krne me word eken and frontend ekt return krn data json fromat ekt convert krl send krnw
 @RequestMapping("/api/media")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin
 public class MediaController {
 
     @Autowired
     private MediaServie mediaService;
 
-    @PostMapping
+    @PostMapping("/save")
     public ResponseEntity<String> createMedia(@RequestBody MediaDTO mediaDTO) {
         String response = mediaService.saveMedia(mediaDTO);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("get-all")
     public ResponseEntity<List<MediaDTO>> getAllMedia() {
         List<MediaDTO> mediaList = mediaService.getAllMedia();
         return ResponseEntity.ok(mediaList);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get-media/{id}")
     public ResponseEntity<MediaDTO> getMediaById(@PathVariable Integer id) {
         List<MediaDTO> mediaList = mediaService.getAllMedia();
         MediaDTO media = mediaList.stream()
@@ -43,14 +43,14 @@ public class MediaController {
         return ResponseEntity.notFound().build();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update-media/{id}")
     public ResponseEntity<String> updateMedia(@PathVariable Integer id, @RequestBody MediaDTO mediaDTO) {
         mediaDTO.setId(id);
         String response = mediaService.updateMedia(mediaDTO);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete-media/{id}")
     public ResponseEntity<String> deleteMedia(@PathVariable Integer id) {
         String response = mediaService.deleteMedia(id);
         return ResponseEntity.ok(response);
