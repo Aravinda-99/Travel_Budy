@@ -31,18 +31,18 @@ function App() {
         </main>
         <Footer />
       </PostsProvider>
-      <button 
+      {/* <button 
         onClick={() => setShowTestTool(!showTestTool)} 
         className="mb-4 bg-blue-500 text-white px-4 py-2 rounded"
       >
         {showTestTool ? 'Hide' : 'Show'} Comment API Test Tool
-      </button>
+      </button> */}
       
-      {showTestTool && (
+      {/* {showTestTool && (
         <div className="mb-8">
           <TestCommentApi />
         </div>
-      )}
+      )} */}
     </div>
   );
 }
