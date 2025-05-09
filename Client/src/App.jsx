@@ -9,6 +9,7 @@ import { PostsProvider } from './context/PostsContext';
 import RecommendationPage from './pages/recommendation/RecommendationPage.jsx'
 import UserProfilePage from './pages/Profile/UserProfilePage.jsx'
 import TestCommentApi from './components/feed/TestCommentApi';
+import Login from './pages/Login/Login.jsx';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -25,6 +26,7 @@ function App() {
             <Route path="/itineraryhub" element={<ItineraryPage />} />
             <Route path="/RecommendationPage" element={<RecommendationPage />} />
             <Route path="/UserProfilePage" element={<UserProfilePage />} />
+            <Route path="/Login" element={<Login />} />
           </Routes>
         </main>
         <Footer />
