@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 
 const ItineraryForm = () => {
   const [formData, setFormData] = useState({
-    travelTopic: '',
+    topic: '',
     description: ''
   });
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -14,10 +16,33 @@ const ItineraryForm = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
+    setLoading(true);
+    
+    try {
+      const response = await fetch('http://localhost:8093/api/v1/tpost/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const responseMessage = await response.text();
+        setMessage(responseMessage);
+        // Reset form after successful submission
+        setFormData({ topic: '', description: '' });
+      } else {
+        setMessage('Failed to save itinerary');
+      }
+    } catch (error) {
+      setMessage('Error connecting to server');
+      console.error('Error submitting form:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const containerStyle = {
@@ -78,6 +103,15 @@ const ItineraryForm = () => {
     transition: 'background-color 0.3s ease'
   };
 
+  const messageStyle = {
+    padding: '0.8rem',
+    marginBottom: '1rem',
+    borderRadius: '5px',
+    backgroundColor: '#e3f2fd',
+    color: '#0d47a1',
+    display: message ? 'block' : 'none'
+  };
+
   const handleButtonHover = (e) => {
     e.target.style.backgroundColor = '#357abd';
   };
@@ -91,13 +125,15 @@ const ItineraryForm = () => {
       <form onSubmit={handleSubmit} style={formStyle}>
         <h2 style={headingStyle}>Create New Itinerary</h2>
         
+        {message && <div style={messageStyle}>{message}</div>}
+        
         <div style={formGroupStyle}>
-          <label htmlFor="travelTopic" style={labelStyle}>Travel Topic</label>
+          <label htmlFor="topic" style={labelStyle}>Travel Topic</label>
           <input
             type="text"
-            id="travelTopic"
-            name="travelTopic"
-            value={formData.travelTopic}
+            id="topic"
+            name="topic"
+            value={formData.topic}
             onChange={handleChange}
             placeholder="Enter your travel topic"
             required
@@ -124,8 +160,9 @@ const ItineraryForm = () => {
           style={buttonStyle}
           onMouseEnter={handleButtonHover}
           onMouseLeave={handleButtonLeave}
+          disabled={loading}
         >
-          Create Itinerary
+          {loading ? 'Creating...' : 'Create Itinerary'}
         </button>
       </form>
     </div>

@@ -1,98 +1,235 @@
-import React, { useState } from 'react';
-import ItineraryUpdateForm from '../Itinerary Hub/ItineraryUpdateForm'; // Assuming ItineraryUpdateForm is in the same directory
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import ItineraryUpdateForm from './ItineraryUpdateForm';
 
-function ItineraryCard({
-  title = "Paris Adventure",
-  description = "Explore the city of love with this amazing 5-day itinerary covering all major attractions including the Eiffel Tower, Louvre Museum, and Notre-Dame Cathedral.",
-  duration = "5 days",
-  date = "June 15-20, 2024",
-  location = "Paris, France",
-  tags = ["Travel", "Europe", "City Tour"],
-  id // Assuming each card has a unique ID for updating
-}) {
-  const [isEditing, setIsEditing] = useState(false);
+function ItineraryCard() {
+  const [itineraries, setItineraries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [editingItinerary, setEditingItinerary] = useState(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
-  const handleEditClick = () => {
-    setIsEditing(true);
+  useEffect(() => {
+    fetchItineraries();
+  }, []);
+
+  const fetchItineraries = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('http://localhost:8093/api/v1/tpost/post/get-all');
+      console.log('Fetched itineraries:', response.data);
+      setItineraries(response.data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching itineraries:', err);
+      setError('Failed to load itineraries. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdate = (updatedData) => {
-    // Here you would typically make an API call to update the data
-    console.log('Updated data:', updatedData);
-    setIsEditing(false); // After successful update, go back to card view
+  const handleUpdateItinerary = async (updatedData) => {
+    try {
+      if (!updatedData.tPid) {
+        throw new Error('Post ID is required for update');
+      }
+
+      const dataToSend = {
+        tpid: updatedData.tPid,
+        topic: updatedData.title,
+        description: updatedData.description,
+        createdAt: updatedData.createdAt
+      };
+      
+      console.log('Sending update data:', dataToSend);
+      
+      const response = await axios.put(`http://localhost:8093/api/v1/tpost/post/update`, dataToSend);
+      
+      if (response.data) {
+        console.log('Update response:', response.data);
+        await fetchItineraries();
+        setEditingItinerary(null);
+        console.log('Itinerary updated successfully!');
+      }
+    } catch (error) {
+      console.error('Error updating itinerary:', error.response?.data || error.message);
+      alert(error.response?.data?.message || 'Failed to update itinerary. Please try again.');
+    }
+  };
+
+  const handleDeleteItinerary = async (id) => {
+    try {
+      console.log('Deleting itinerary with ID:', id);
+      const response = await axios.delete(`http://localhost:8093/api/v1/tpost/post/delete/${id}`);
+      
+      if (response.data) {
+        console.log('Delete response:', response.data);
+        await fetchItineraries();
+        setDeleteConfirmation(null);
+        console.log('Itinerary deleted successfully!');
+      }
+    } catch (error) {
+      console.error('Error deleting itinerary:', error.response?.data || error.message);
+      alert(error.response?.data?.message || 'Failed to delete itinerary. Please try again.');
+    }
   };
 
   const handleCancelEdit = () => {
-    setIsEditing(false);
+    setEditingItinerary(null);
   };
 
-  if (isEditing) {
+  const handleDeleteClick = (itinerary) => {
+    setDeleteConfirmation({
+      id: itinerary.tpid,
+      topic: itinerary.topic
+    });
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmation(null);
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Not specified";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (e) {
+      return dateString;
+    }
+  };
+
+  const handleEditClick = (itinerary) => {
+    console.log('Raw itinerary data:', itinerary);
+
+    // Check if itinerary and tpid exist (changed to lowercase)
+    if (!itinerary || typeof itinerary.tpid === 'undefined') {
+      console.error('Invalid itinerary data:', itinerary);
+      return;
+    }
+
+    // Create a new object with the required fields
+    const editData = {
+      tPid: itinerary.tpid, // Map lowercase tpid to uppercase tPid for the form
+      title: itinerary.topic || '',
+      description: itinerary.description || '',
+      createdAt: itinerary.createdAt
+    };
+
+    console.log('Setting editing itinerary with data:', editData);
+    setEditingItinerary(editData);
+  };
+
+  if (editingItinerary) {
     return (
       <ItineraryUpdateForm
-        initialData={{ title, description, duration, date, location, tags }}
-        onUpdate={handleUpdate}
+        initialData={editingItinerary}
+        onUpdate={handleUpdateItinerary}
         onCancel={handleCancelEdit}
       />
     );
   }
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-xl text-gray-600">Loading itineraries...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-xl text-red-600">{error}</div>
+      </div>
+    );
+  }
+
+  if (itineraries.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-xl text-gray-600">No itineraries found.</div>
+      </div>
+    );
+  }
+
   return (
-    <div
-      className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100"
-      style={{
-        maxWidth: '500px',
-        width: '100%',
-      }}
-    >
-      <div className="p-6">
-        {/* Header with Title and Duration Badge */}
-        <div className="flex justify-between items-start mb-4">
-          <h2 className="text-2xl font-bold text-gray-800 hover:text-blue-600 transition-colors duration-300">{title}</h2>
-          <span className="bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-lg shadow-sm">
-            {duration}
-          </span>
-        </div>
-
-        {/* Location and Date */}
-        <div className="flex items-center text-sm text-gray-600 mb-5 space-x-4">
-          <div className="flex items-center">
-            <svg className="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-            </svg>
-            <span>{location}</span>
-          </div>
-
-          <div className="flex items-center">
-            <svg className="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-            </svg>
-            <span>{date}</span>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Your Itineraries</h1>
+      
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Confirm Deletion</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete the itinerary "{deleteConfirmation.topic}"? 
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+                onClick={cancelDelete}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+                onClick={() => handleDeleteItinerary(deleteConfirmation.id)}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
+      )}
 
-        {/* Description with accent border */}
-        <div className="mb-5 pl-3 border-l-4 border-blue-500">
-          <p className="text-gray-600 leading-relaxed">
-            {description}
-          </p>
-        </div>
-
-        {/* Tags and Action Button */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag, index) => (
-              <span key={index} className="bg-gray-50 text-gray-700 text-xs px-2 py-1 rounded-md border border-gray-200 hover:bg-gray-100 transition-colors duration-200">
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          <button
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-1 text-sm"
-            onClick={handleEditClick}
-          >
-            <span>Edit</span>
-          </button>
+      {/* Scrollable container for itinerary cards */}
+      <div className="h-96 overflow-y-auto pr-2">
+        <div className="flex flex-col space-y-6">
+          {itineraries.map((itinerary) => (
+            <div
+              key={itinerary.tpid}
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 w-full"
+            >
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <h2 className="text-2xl font-bold text-gray-800 hover:text-blue-600 transition-colors duration-300">
+                    {itinerary.topic}
+                  </h2>
+                  {itinerary.createdAt && (
+                    <span className="bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-lg shadow-sm">
+                      {formatDate(itinerary.createdAt)}
+                    </span>
+                  )}
+                </div>
+                <div className="mb-5 pl-3 border-l-4 border-blue-500">
+                  <p className="text-gray-600 leading-relaxed">
+                    {itinerary.description}
+                  </p>
+                </div>
+                <div className="flex items-center justify-end pt-4 border-t border-gray-100 space-x-3">
+                  <button
+                    className="bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-1 text-sm"
+                    onClick={() => handleDeleteClick(itinerary)}
+                  >
+                    <span>Delete</span>
+                  </button>
+                  <button
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-1 text-sm"
+                    onClick={() => handleEditClick(itinerary)}
+                  >
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

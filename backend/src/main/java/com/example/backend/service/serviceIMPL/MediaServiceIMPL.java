@@ -7,7 +7,6 @@ import com.example.backend.service.MediaServie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,17 +19,8 @@ public class MediaServiceIMPL implements MediaServie {
 
     @Override
     public String saveMedia(MediaDTO mediaDto) {
-        // Create a new Media entity
-        com.example.backend.entity.Media media = new com.example.backend.entity.Media();
-
-        // Set properties from the DTO
-        media.setImageUrls(mediaDto.getImageUrls());
-        media.setDescription(mediaDto.getDescription());
-        media.setCreatedAt(LocalDateTime.now()); // Set current time or use mediaDto.getCreatedAt()
-
-        // Save the entity to the repository
+        Media media = mediaDto.toEntity();
         mediaRepo.save(media);
-
         return "Media saved successfully!";
     }
 
@@ -42,10 +32,12 @@ public class MediaServiceIMPL implements MediaServie {
 
         Optional<Media> existingMedia = mediaRepo.findById(mediaDto.getId());
         if (existingMedia.isPresent()) {
-            com.example.backend.entity.Media media = existingMedia.get();
+            Media media = existingMedia.get();
+            media.setTitle(mediaDto.getTitle());
+            media.setLocation(mediaDto.getLocation());
             media.setImageUrls(mediaDto.getImageUrls());
             media.setDescription(mediaDto.getDescription());
-            // Note: We're not updating createdAt as it's typically marked updatable=false in the entity
+            // Note: createdAt is not updated as it's marked updatable=false in the entity
 
             mediaRepo.save(media);
             return "Media updated successfully!";
@@ -56,17 +48,11 @@ public class MediaServiceIMPL implements MediaServie {
 
     @Override
     public List<MediaDTO> getAllMedia() {
-        List<com.example.backend.entity.Media> mediaList = mediaRepo.findAll();
+        List<Media> mediaList = mediaRepo.findAll();
         List<MediaDTO> mediaDtos = new ArrayList<>();
 
-        for (com.example.backend.entity.Media media : mediaList) {
-            MediaDTO dto = new MediaDTO();
-            dto.setId(media.getId());
-            dto.setImageUrls(media.getImageUrls());
-            dto.setDescription(media.getDescription());
-            dto.setCreatedAt(media.getCreatedAt());
-
-            mediaDtos.add(dto);
+        for (Media media : mediaList) {
+            mediaDtos.add(MediaDTO.fromEntity(media));
         }
 
         return mediaDtos;
