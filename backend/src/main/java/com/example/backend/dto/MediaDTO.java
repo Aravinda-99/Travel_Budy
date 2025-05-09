@@ -16,18 +16,21 @@ import java.util.Set;
 public class MediaDTO {
 
     private Integer id;
-
+    private String title;
+    private String location;
+    
     @Builder.Default
     private Set<String> imageUrls = new HashSet<>();
 
     private String description;
-
     private LocalDateTime createdAt;
 
     // Optional: Conversion methods between Entity and DTO
     public static MediaDTO fromEntity(com.example.backend.entity.Media media) {
         return MediaDTO.builder()
                 .id(media.getId())
+                .title(media.getTitle())
+                .location(media.getLocation())
                 .imageUrls(media.getImageUrls())
                 .description(media.getDescription())
                 .createdAt(media.getCreatedAt())
@@ -37,6 +40,8 @@ public class MediaDTO {
     public com.example.backend.entity.Media toEntity() {
         return com.example.backend.entity.Media.builder()
                 .id(this.id)
+                .title(this.title)
+                .location(this.location)
                 .imageUrls(this.imageUrls)
                 .description(this.description)
                 .createdAt(this.createdAt)
