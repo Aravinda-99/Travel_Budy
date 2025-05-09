@@ -8,7 +8,6 @@ import ItineraryPage from './pages/ItineraryPage';
 import { PostsProvider } from './context/PostsContext';
 import RecommendationPage from './pages/recommendation/RecommendationPage.jsx'
 import UserProfilePage from './pages/Profile/UserProfilePage.jsx'
-import TestCommentApi from './components/feed/TestCommentApi';
 import Login from './pages/Login/Login.jsx';
 
 function App() {
