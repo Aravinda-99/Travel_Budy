@@ -8,7 +8,7 @@ import ItineraryPage from './pages/ItineraryPage';
 import { PostsProvider } from './context/PostsContext';
 import RecommendationPage from './pages/recommendation/RecommendationPage.jsx'
 import UserProfilePage from './pages/Profile/UserProfilePage.jsx'
-
+import Login from './pages/Login/Login.jsx';
 
 function App() {
   const [count, setCount] = useState(0);
