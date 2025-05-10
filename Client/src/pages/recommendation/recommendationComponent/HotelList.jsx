@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import HotelCard from './HotelCard';
-import axios from 'axios';
-
-// Create axios instance with base configuration
-const api = axios.create({
-  baseURL: 'http://localhost:8093',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+import { hotelAPI } from '../../../services/api';
 
 const HotelList = () => {
   const [hotels, setHotels] = useState([]);
@@ -22,13 +14,14 @@ const HotelList = () => {
   const fetchHotels = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/v1/hotel/get-all-hotel');
-      if (response.data.code === 200) {
-        setHotels(response.data.data);
+      const response = await hotelAPI.getAllHotels();
+      if (response.code === 200) {
+        setHotels(response.data);
       } else {
         setError('Failed to fetch hotels');
       }
     } catch (error) {
+      console.error('Error fetching hotels:', error);
       setError(error.response?.data?.message || 'Error fetching hotels');
     } finally {
       setLoading(false);

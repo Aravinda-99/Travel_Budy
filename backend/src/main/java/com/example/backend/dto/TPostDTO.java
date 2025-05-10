@@ -18,7 +18,7 @@ public class TPostDTO {
     private String description;
     private LocalDateTime createdAt;
 
-    // Optional: Method to convert from Entity to DTO
+    // Method to convert from Entity to DTO
     public static TPostDTO fromEntity(com.example.backend.entity.TPost entity) {
         return TPostDTO.builder()
                 .tPid(entity.getTPid())
@@ -28,7 +28,7 @@ public class TPostDTO {
                 .build();
     }
 
-    // Optional: Method to convert from DTO to Entity
+    // Method to convert from DTO to Entity
     public com.example.backend.entity.TPost toEntity() {
         return com.example.backend.entity.TPost.builder()
                 .TPid(this.tPid)

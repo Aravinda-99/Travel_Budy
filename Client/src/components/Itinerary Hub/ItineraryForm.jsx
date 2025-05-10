@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { itineraryAPI, authAPI } from '../../services/api';
+import { toast } from 'react-toastify';
 
 const ItineraryForm = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     topic: '',
-    description: ''
+    description: '',
+    createdAt: new Date().toISOString()
   });
-  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -18,152 +22,108 @@ const ItineraryForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     
-    try {
-      const response = await fetch('http://localhost:8093/api/v1/tpost/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+    if (!authAPI.isAuthenticated()) {
+      toast.error('Please login to create an itinerary');
+      navigate('/login');
+      return;
+    }
 
-      if (response.ok) {
-        const responseMessage = await response.text();
-        setMessage(responseMessage);
-        // Reset form after successful submission
-        setFormData({ topic: '', description: '' });
+    try {
+      setLoading(true);
+      
+      // Validate form data
+      if (!formData.topic || !formData.description) {
+        toast.error('Please fill in all required fields');
+        setLoading(false);
+        return;
+      }
+
+      // Create the post data matching the backend DTO
+      const postData = {
+        topic: formData.topic,
+        description: formData.description,
+        createdAt: new Date().toISOString()
+      };
+
+      // Send to backend using the API service
+      const response = await itineraryAPI.createPost(postData);
+      
+      if (response && response.data) {
+        toast.success('Itinerary created successfully!');
+        
+        // Clear form
+        setFormData({
+          topic: '',
+          description: '',
+          createdAt: new Date().toISOString()
+        });
+
+        // Redirect to itinerary list
+        navigate('/itineraryhub');
       } else {
-        setMessage('Failed to save itinerary');
+        throw new Error('Failed to create itinerary');
       }
     } catch (error) {
-      setMessage('Error connecting to server');
-      console.error('Error submitting form:', error);
+      console.error('Error creating itinerary:', error);
+      if (error.response?.status === 403) {
+        toast.error('Session expired. Please login again.');
+        navigate('/login');
+      } else {
+        toast.error(error.response?.data || 'Failed to create itinerary. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const containerStyle = {
-    maxWidth: '600px',
-    margin: '2rem auto',
-    padding: '2rem',
-    backgroundColor: '#ffffff',
-    borderRadius: '10px',
-    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
-  };
-
-  const formStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1.5rem'
-  };
-
-  const headingStyle = {
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: '1rem'
-  };
-
-  const formGroupStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem'
-  };
-
-  const labelStyle = {
-    fontWeight: '600',
-    color: '#444'
-  };
-
-  const inputStyle = {
-    padding: '0.8rem',
-    border: '1px solid #ddd',
-    borderRadius: '5px',
-    fontSize: '1rem',
-    transition: 'border-color 0.3s ease'
-  };
-
-  const textareaStyle = {
-    ...inputStyle,
-    minHeight: '100px',
-    resize: 'vertical'
-  };
-
-  const buttonStyle = {
-    backgroundColor: '#4a90e2',
-    color: 'white',
-    padding: '1rem',
-    border: 'none',
-    borderRadius: '5px',
-    fontSize: '1rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease'
-  };
-
-  const messageStyle = {
-    padding: '0.8rem',
-    marginBottom: '1rem',
-    borderRadius: '5px',
-    backgroundColor: '#e3f2fd',
-    color: '#0d47a1',
-    display: message ? 'block' : 'none'
-  };
-
-  const handleButtonHover = (e) => {
-    e.target.style.backgroundColor = '#357abd';
-  };
-
-  const handleButtonLeave = (e) => {
-    e.target.style.backgroundColor = '#4a90e2';
-  };
-
   return (
-    <div style={containerStyle}>
-      <form onSubmit={handleSubmit} style={formStyle}>
-        <h2 style={headingStyle}>Create New Itinerary</h2>
-        
-        {message && <div style={messageStyle}>{message}</div>}
-        
-        <div style={formGroupStyle}>
-          <label htmlFor="topic" style={labelStyle}>Travel Topic</label>
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6">Create New Itinerary</h2>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label htmlFor="topic" className="block text-sm font-medium text-gray-700 mb-1">
+            Title *
+          </label>
           <input
             type="text"
             id="topic"
             name="topic"
             value={formData.topic}
             onChange={handleChange}
-            placeholder="Enter your travel topic"
             required
-            style={inputStyle}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter itinerary title"
           />
         </div>
 
-        <div style={formGroupStyle}>
-          <label htmlFor="description" style={labelStyle}>Description</label>
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            Description *
+          </label>
           <textarea
             id="description"
             name="description"
             value={formData.description}
             onChange={handleChange}
-            placeholder="Describe your travel plans"
-            rows="4"
             required
-            style={textareaStyle}
+            rows="4"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter itinerary description"
           />
         </div>
 
-        <button 
-          type="submit" 
-          style={buttonStyle}
-          onMouseEnter={handleButtonHover}
-          onMouseLeave={handleButtonLeave}
-          disabled={loading}
-        >
-          {loading ? 'Creating...' : 'Create Itinerary'}
-        </button>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={loading}
+            className={`px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+              loading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            {loading ? 'Creating...' : 'Create Itinerary'}
+          </button>
+        </div>
       </form>
     </div>
   );

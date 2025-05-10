@@ -40,7 +40,9 @@ const ItineraryPage = () => {
 
       {/* Modal for Adding Itinerary */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${isModalOpen ? 'flex' : 'hidden'}`}
+        className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${
+          isModalOpen ? 'block' : 'hidden'
+        }`}
         onClick={handleCloseModal}
       >
         <div

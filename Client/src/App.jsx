@@ -9,6 +9,8 @@ import { PostsProvider } from './context/PostsContext';
 import RecommendationPage from './pages/recommendation/RecommendationPage.jsx'
 import UserProfilePage from './pages/Profile/UserProfilePage.jsx'
 import Login from './pages/Login/Login.jsx';
+import SignUp from './pages/Register/SignupForm.jsx'
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -21,11 +23,42 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/feed" element={<FeedPage />} />
-            <Route path="/itineraryhub" element={<ItineraryPage />} />
-            <Route path="/RecommendationPage" element={<RecommendationPage />} />
-            <Route path="/UserProfilePage" element={<UserProfilePage />} />
-            <Route path="/Login" element={<Login />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            
+            {/* Protected Routes */}
+            <Route 
+              path="/feed" 
+              element={
+                <ProtectedRoute>
+                  <FeedPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/itineraryhub" 
+              element={
+                <ProtectedRoute>
+                  <ItineraryPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/RecommendationPage" 
+              element={
+                <ProtectedRoute>
+                  <RecommendationPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/UserProfilePage" 
+              element={
+                <ProtectedRoute>
+                  <UserProfilePage />
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </main>
         <Footer />

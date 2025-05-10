@@ -1,17 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FiStar, FiMapPin, FiExternalLink, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 import { FaWifi, FaSwimmingPool, FaParking, FaUtensils, FaTv, FaSnowflake, FaSpa, FaDumbbell, FaGlassMartiniAlt, FaConciergeBell, FaPlane, FaCoffee, FaPaw, FaUmbrellaBeach } from 'react-icons/fa';
-import axios from 'axios';
+import { hotelAPI } from '../../../services/api';
 import HotelUpdateForm from './HotelUpdateForm';
 import HotelForm from './HotelForm';
-
-// Create axios instance with base configuration
-const api = axios.create({
-  baseURL: 'http://localhost:8093',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
 
 const HotelTable = () => {
   const [hotels, setHotels] = useState([]);
@@ -21,7 +13,6 @@ const HotelTable = () => {
   const [editingHotelId, setEditingHotelId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // Fetch hotels on component mount
   useEffect(() => {
     fetchHotels();
   }, []);
@@ -29,13 +20,14 @@ const HotelTable = () => {
   const fetchHotels = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/v1/hotel/get-all-hotel');
-      if (response.data.code === 200) {
-        setHotels(response.data.data);
+      const response = await hotelAPI.getAllHotels();
+      if (response.code === 200) {
+        setHotels(response.data);
       } else {
         setError('Failed to fetch hotels');
       }
     } catch (error) {
+      console.error('Error fetching hotels:', error);
       setError(error.response?.data?.message || 'Error fetching hotels');
     } finally {
       setLoading(false);
@@ -48,46 +40,46 @@ const HotelTable = () => {
 
   const handleUpdate = async (updatedHotel) => {
     try {
-      const response = await api.put('/api/v1/hotel/update', updatedHotel);
-      if (response.data.code === 200) {
-        // Update the hotel in the state
+      const response = await hotelAPI.updateHotel(updatedHotel);
+      if (response.code === 200) {
         setHotels(hotels.map(hotel => 
           hotel.id === updatedHotel.id ? { ...hotel, ...updatedHotel } : hotel
         ));
-        setEditingHotelId(null); // Close the edit form
+        setEditingHotelId(null);
       } else {
         setError('Failed to update hotel');
       }
     } catch (error) {
+      console.error('Error updating hotel:', error);
       setError(error.response?.data?.message || 'Error updating hotel');
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      const response = await api.delete(`/api/v1/hotel/delete-hotel/${id}`);
-      if (response.data.code === 200) {
-        // Remove the deleted hotel from the state
+      const response = await hotelAPI.deleteHotel(id);
+      if (response.code === 200) {
         setHotels(hotels.filter(hotel => hotel.id !== id));
       } else {
         setError('Failed to delete hotel');
       }
     } catch (error) {
+      console.error('Error deleting hotel:', error);
       setError(error.response?.data?.message || 'Error deleting hotel');
     }
   };
 
   const handleAdd = async (newHotel) => {
     try {
-      const response = await api.post('/api/v1/hotel/save', newHotel);
-      if (response.data.code === 201) {
-        // Add the new hotel to the state
-        setHotels([...hotels, response.data.data]);
-        setShowAddForm(false); // Close the add form
+      const response = await hotelAPI.saveHotel(newHotel);
+      if (response.code === 201) {
+        setHotels([...hotels, response.data]);
+        setShowAddForm(false);
       } else {
         setError('Failed to add hotel');
       }
     } catch (error) {
+      console.error('Error adding hotel:', error);
       setError(error.response?.data?.message || 'Error adding hotel');
     }
   };
@@ -112,7 +104,6 @@ const HotelTable = () => {
       'beach access': <FaUmbrellaBeach className="text-yellow-400" />
     };
 
-    // Convert Set to Array if needed
     const amenitiesArray = Array.isArray(amenities) ? amenities : Array.from(amenities || []);
 
     return (
@@ -186,7 +177,6 @@ const HotelTable = () => {
     );
   }
 
-  // If we're editing a hotel, show the update form
   if (editingHotelId) {
     return (
       <HotelUpdateForm
@@ -197,7 +187,6 @@ const HotelTable = () => {
     );
   }
 
-  // If we're adding a new hotel, show the add form
   if (showAddForm) {
     return (
       <HotelForm
@@ -278,18 +267,24 @@ const HotelTable = () => {
                     </div>
                   </td>
                   <td className="p-4">
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleEdit(item.id); }}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                        aria-label="Edit"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(item.id);
+                        }}
+                        className="text-blue-600 hover:text-blue-800"
                       >
                         <FiEdit2 size={18} />
                       </button>
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                        aria-label="Delete"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm('Are you sure you want to delete this hotel?')) {
+                            handleDelete(item.id);
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-800"
                       >
                         <FiTrash2 size={18} />
                       </button>

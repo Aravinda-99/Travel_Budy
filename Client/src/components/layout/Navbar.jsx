@@ -1,12 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Globe, Search, Bell, MessageCircle } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, Globe, Search, Bell, MessageCircle, LogOut } from 'lucide-react';
 import UserAvatar from '../shared/UserAvatar';
+import { authAPI } from '../../services/api';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check authentication status on mount and token change
+  useEffect(() => {
+    const checkAuth = () => {
+      const isAuth = authAPI.isAuthenticated();
+      setIsAuthenticated(isAuth);
+      
+      if (isAuth) {
+        const userData = authAPI.getUser();
+        if (userData) {
+          const isAdmin = userData.roles?.some(role => role.name === 'ROLE_ADMIN');
+          setUserRole(isAdmin ? 'ADMIN' : 'USER');
+        }
+      } else {
+        setUserRole(null);
+      }
+    };
+
+    checkAuth();
+    
+    // Add event listener for storage changes
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, []);
 
   // Change navbar style on scroll
   useEffect(() => {
@@ -23,12 +51,31 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   }, [location]);
 
-  const navLinks = [
+  const handleLogout = () => {
+    authAPI.logout();
+  };
+
+  // Define public and protected navigation links
+  const publicLinks = [
     { name: 'Home', path: '/' },
+  ];
+
+  const protectedLinks = [
     { name: 'Feed', path: '/feed' },
     { name: 'Recommendation', path: '/RecommendationPage' },
     { name: 'Itinerary Hub', path: '/itineraryhub' },
   ];
+
+  // Combine links based on authentication status
+  const navLinks = [
+    ...publicLinks,
+    ...(isAuthenticated ? protectedLinks : []),
+  ];
+
+  // Add admin route if user has admin role
+  if (userRole === 'ADMIN') {
+    navLinks.push({ name: 'Admin', path: '/admin' });
+  }
 
   const isActive = (path) => location.pathname === path;
 
@@ -48,16 +95,16 @@ const Navbar = () => {
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`text-sm font-medium transition-colors ${
                   isActive(link.path)
-                    ? 'text-primary-700 bg-primary-50'
-                    : 'text-gray-700 hover:text-primary-600 hover:bg-gray-100'
+                    ? 'text-primary-600'
+                    : 'text-gray-700 hover:text-primary-600'
                 }`}
               >
                 {link.name}
@@ -65,67 +112,113 @@ const Navbar = () => {
             ))}
           </nav>
 
-          {/* Desktop Actions */}
-          <div className="hidden md:flex items-center gap-3">
-            <button className="rounded-full p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100">
-              <Search className="h-5 w-5" />
-            </button>
-            <button className="rounded-full p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-secondary-500"></span>
-            </button>
-            <button className="rounded-full p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100">
-              <MessageCircle className="h-5 w-5" />
-            </button>
-            <UserAvatar />
-          </div>
-
-          {/* Mobile menu button */}
-          <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 md:hidden text-gray-700"
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t mt-2 animate-fade-in">
-          <div className="container mx-auto px-4 py-2 space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`block px-4 py-3 rounded-md text-sm font-medium ${
-                  isActive(link.path)
-                    ? 'text-primary-700 bg-primary-50'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <div className="flex items-center justify-between pt-2 pb-1 border-t border-gray-100 mt-2">
-              <div className="flex gap-4">
-                <button className="rounded-full p-2 text-gray-600 hover:bg-gray-100">
+          {/* Desktop Right Section */}
+          <div className="hidden md:flex items-center gap-4">
+            {isAuthenticated ? (
+              <>
+                <button className="p-2 text-gray-600 hover:text-primary-600 transition-colors">
                   <Search className="h-5 w-5" />
                 </button>
-                <button className="rounded-full p-2 text-gray-600 hover:bg-gray-100 relative">
+                <button className="p-2 text-gray-600 hover:text-primary-600 transition-colors">
                   <Bell className="h-5 w-5" />
-                  <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-secondary-500"></span>
                 </button>
-                <button className="rounded-full p-2 text-gray-600 hover:bg-gray-100">
+                <button className="p-2 text-gray-600 hover:text-primary-600 transition-colors">
                   <MessageCircle className="h-5 w-5" />
                 </button>
+                <Link to="/UserProfilePage">
+                  <UserAvatar />
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="h-5 w-5" />
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-4">
+                <Link
+                  to="/login"
+                  className="text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/signup"
+                  className="text-sm font-medium text-white bg-primary-600 px-4 py-2 rounded-md hover:bg-primary-700 transition-colors"
+                >
+                  Sign Up
+                </Link>
               </div>
-              <UserAvatar />
-            </div>
+            )}
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 md:hidden text-gray-600"
+          >
+            {isMobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </button>
         </div>
-      )}
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden py-4">
+            <nav className="flex flex-col gap-4">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`text-sm font-medium transition-colors ${
+                    isActive(link.path)
+                      ? 'text-primary-600'
+                      : 'text-gray-700 hover:text-primary-600'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              ))}
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/UserProfilePage"
+                    className="text-sm font-medium text-gray-700 hover:text-primary-600"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="text-sm font-medium text-gray-700 hover:text-primary-600 text-left"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-sm font-medium text-gray-700 hover:text-primary-600"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="text-sm font-medium text-primary-600 hover:text-primary-700"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </nav>
+          </div>
+        )}
+      </div>
     </header>
   );
 };

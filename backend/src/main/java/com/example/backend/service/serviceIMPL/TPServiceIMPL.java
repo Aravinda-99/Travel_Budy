@@ -5,7 +5,9 @@ import com.example.backend.entity.TPost;
 import com.example.backend.repo.TPostRepo;
 import com.example.backend.service.TPostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,41 +15,42 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class TPServiceIMPL implements TPostService {
     @Autowired
     private TPostRepo tPostRepo;
 
     @Override
     public String savePost(TPostDTO tPostDTO) {
-        // Create a new TPost entity
-        TPost tPost = new TPost();
+        // Ensure user is authenticated
+        if (SecurityContextHolder.getContext().getAuthentication() == null ||
+            !SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+            throw new SecurityException("User must be authenticated to save a post");
+        }
 
-        // Set properties from the DTO
-        tPost.setTopic(tPostDTO.getTopic());
-        tPost.setDescription(tPostDTO.getDescription());
-        tPost.setCreatedAt(LocalDateTime.now()); // Set current time
+        try {
+            // Create a new TPost entity using the builder pattern
+            TPost tPost = TPost.builder()
+                .topic(tPostDTO.getTopic())
+                .description(tPostDTO.getDescription())
+                .createdAt(LocalDateTime.now())
+                .build();
 
-        // Save the entity to the repository
-        tPostRepo.save(tPost);
-
-        return "Post saved successfully!";
+            // Save the entity
+            tPostRepo.save(tPost);
+            return "Post saved successfully!";
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save post: " + e.getMessage());
+        }
     }
 
     @Override
     public List<TPostDTO> getAllPosts() {
         List<TPost> tPosts = tPostRepo.findAll();
-
         List<TPostDTO> tPostDTOs = new ArrayList<>();
 
         for (TPost tPost : tPosts) {
-            TPostDTO tPostDTO = new TPostDTO();
-
-            tPostDTO.setTPid(tPost.getTPid());
-            tPostDTO.setTopic(tPost.getTopic());
-            tPostDTO.setDescription(tPost.getDescription());
-            tPostDTO.setCreatedAt(tPost.getCreatedAt());
-
-            tPostDTOs.add(tPostDTO);
+            tPostDTOs.add(TPostDTO.fromEntity(tPost));
         }
 
         return tPostDTOs;
@@ -59,22 +62,27 @@ public class TPServiceIMPL implements TPostService {
             return "Post ID cannot be null for update operation";
         }
 
-        // Check if post exists
-        Optional<TPost> existingPost = tPostRepo.findById(tPostDTO.getTPid());
+        // Ensure user is authenticated
+        if (SecurityContextHolder.getContext().getAuthentication() == null ||
+            !SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+            throw new SecurityException("User must be authenticated to update a post");
+        }
 
-        if (existingPost.isPresent()) {
-            TPost tPost = existingPost.get();
+        try {
+            Optional<TPost> existingPost = tPostRepo.findById(tPostDTO.getTPid());
 
-            // Update the fields
-            tPost.setTopic(tPostDTO.getTopic());
-            tPost.setDescription(tPostDTO.getDescription());
-
-            // Save the updated entity
-            tPostRepo.save(tPost);
-
-            return "Post updated successfully!";
-        } else {
-            return "Post not found with ID: " + tPostDTO.getTPid();
+            if (existingPost.isPresent()) {
+                TPost tPost = existingPost.get();
+                tPost.setTopic(tPostDTO.getTopic());
+                tPost.setDescription(tPostDTO.getDescription());
+                
+                tPostRepo.save(tPost);
+                return "Post updated successfully!";
+            } else {
+                return "Post not found with ID: " + tPostDTO.getTPid();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update post: " + e.getMessage());
         }
     }
 
@@ -84,16 +92,23 @@ public class TPServiceIMPL implements TPostService {
             return "Post ID cannot be null for delete operation";
         }
 
-        // Check if post exists
-        Optional<TPost> existingPost = tPostRepo.findById(id);
+        // Ensure user is authenticated
+        if (SecurityContextHolder.getContext().getAuthentication() == null ||
+            !SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+            throw new SecurityException("User must be authenticated to delete a post");
+        }
 
-        if (existingPost.isPresent()) {
-            // Delete the entity
-            tPostRepo.deleteById(id);
+        try {
+            Optional<TPost> existingPost = tPostRepo.findById(id);
 
-            return "Post deleted successfully!";
-        } else {
-            return "Post not found with ID: " + id;
+            if (existingPost.isPresent()) {
+                tPostRepo.deleteById(id);
+                return "Post deleted successfully!";
+            } else {
+                return "Post not found with ID: " + id;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete post: " + e.getMessage());
         }
     }
 }

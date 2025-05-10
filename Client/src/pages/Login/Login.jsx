@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Leaf, Check } from 'lucide-react';
-import axios from 'axios';
-import { Globe } from 'lucide-react';
+import { Globe, Check } from 'lucide-react';
+import { authAPI } from '../../services/api';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -15,7 +14,6 @@ const Login = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
 
-  // Validate that email and password are provided and email format is correct
   const validateForm = () => {
     const newErrors = {};
     if (!formData.email.trim()) {
@@ -30,7 +28,6 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle field changes (including checkbox)
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -40,54 +37,49 @@ const Login = () => {
     setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
-  // On form submit, validate and call the JWT authentication endpoint.
-  // On success, store the token with Bearer prefix, display the modal, then navigate based on role.
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    
     setIsLoading(true);
     try {
-      // Prepare payload: map email to username required by backend
-      const payload = {
+      const credentials = {
         username: formData.email,
         password: formData.password
       };
 
-      // Call the authentication endpoint
+      const response = await authAPI.login(credentials);
 
-      const response = await axios.post('http://localhost:8093', payload);
-
-      const data = response.data;
-
-      // Save the JWT token with Bearer prefix
-      localStorage.setItem('jwtToken', `Bearer ${data.jwtToken}`);
-      console.log('Login successful for user:', data.user);
-
-      // Debug: Log the roles to verify the response structure
-      console.log('User role:', data.user.role);
-
-      // Display success modal and redirect based on role
-      setShowSuccessModal(true);
-      setTimeout(() => {
-        setShowSuccessModal(false);
-
-        // Check if user has the ADMIN or Admin role
-        // We need to check if the role array contains an object with roleName of "ADMIN" or "Admin"
-        const isAdmin = data.user.role && data.user.role.some(
-          role => role.roleName === 'ADMIN' || role.roleName === 'Admin'
-        );
-
-        console.log('Is admin?', isAdmin);
-
-        if (isAdmin) {
-          navigate('/AdminDashboard');
-        } else {
-          navigate('/');
-        }
-      }, 2000);
+      if (response.success) {
+        setShowSuccessModal(true);
+        
+        // Get redirect path if exists
+        const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+        sessionStorage.removeItem('redirectAfterLogin');
+        
+        setTimeout(() => {
+          setShowSuccessModal(false);
+          // Check if user has admin role
+          const isAdmin = response.user?.roles?.some(
+            role => role.name === 'ROLE_ADMIN'
+          );
+          
+          // Navigate based on role or redirect path
+          if (redirectPath) {
+            navigate(redirectPath);
+          } else if (isAdmin) {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
+        }, 2000);
+      } else {
+        setErrors({ submit: response.message || 'Login failed. Please check your credentials.' });
+      }
     } catch (error) {
       console.error('Login error:', error);
-      setErrors({ submit: 'Login failed. Please check your credentials.' });
+      const errorMessage = error.response?.data?.message || error.message || 'Login failed. Please check your credentials.';
+      setErrors({ submit: errorMessage });
     } finally {
       setIsLoading(false);
     }
@@ -109,9 +101,6 @@ const Login = () => {
         {/* Form Side */}
         <div className="w-full md:w-1/2 p-6">
           <div className="text-center mb-6">
-            {/* <Link to="/" className="flex items-center justify-center group">
-              <Leaf size={28} className="text-green-600 transition-transform duration-500 group-hover:rotate-90 group-hover:scale-110" />
-            </Link> */}
             <Link to="/" className="flex items-center justify-center gap-2">
               <Globe className="h-8 w-8 text-primary-600" />
             </Link>
@@ -137,7 +126,7 @@ const Login = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className={`w-full px-3 py-2 rounded-md border ${errors.email ? 'border-red-300' : 'border-gray-300'
-                    } focus:border-green-600 focus:ring focus:ring-green-200 focus:ring-opacity-50`}
+                    } focus:border-primary-600 focus:ring focus:ring-primary-200 focus:ring-opacity-50`}
                 />
                 {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
               </div>
@@ -151,7 +140,7 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className={`w-full px-3 py-2 rounded-md border ${errors.password ? 'border-red-300' : 'border-gray-300'
-                    } focus:border-green-600 focus:ring focus:ring-green-200 focus:ring-opacity-50`}
+                    } focus:border-primary-600 focus:ring focus:ring-primary-200 focus:ring-opacity-50`}
                 />
                 {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
               </div>
@@ -165,34 +154,16 @@ const Login = () => {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={handleChange}
-                  className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                  className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
                 <label htmlFor="rememberMe" className="text-sm text-gray-600">
                   Remember me
                 </label>
               </div>
-              <Link to="/forgot-password" className="text-sm text-green-600 hover:text-green-700">
+              <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
                 Forgot password?
               </Link>
             </div>
-
-            {/* <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-2 px-4 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-400 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Signing in...
-                </span>
-              ) : (
-                'Sign In'
-              )}
-            </button> */}
 
             <button
               type="submit"
@@ -221,17 +192,6 @@ const Login = () => {
               </div>
             </div>
 
-            {/* <div className="grid grid-cols-2 gap-3">
-              <button type="button" className="flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50">
-                <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
-                Google
-              </button>
-              <button type="button" className="flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50">
-                <img src="https://www.apple.com/favicon.ico" alt="Apple" className="w-5 h-5" />
-                Apple
-              </button>
-            </div> */}
-
             <div className="grid grid-cols-2 gap-3">
               <button type="button" className="flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50">
                 <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
@@ -245,7 +205,7 @@ const Login = () => {
 
             <p className="text-center text-sm text-gray-600 mt-4">
               Don't have an account?{' '}
-              <Link to="/signup" className="font-medium text-green-600 hover:text-green-700">
+              <Link to="/signup" className="font-medium text-primary-600 hover:text-primary-700">
                 Sign up
               </Link>
             </p>
