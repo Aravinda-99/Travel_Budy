@@ -8,6 +8,7 @@ function ItineraryCard() {
   const [error, setError] = useState(null);
   const [editingItinerary, setEditingItinerary] = useState(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
+  const [likedItineraries, setLikedItineraries] = useState(new Set());
 
   useEffect(() => {
     fetchItineraries();
@@ -122,6 +123,18 @@ function ItineraryCard() {
 
     console.log('Setting editing itinerary with data:', editData);
     setEditingItinerary(editData);
+  };
+
+  const handleLikeClick = (itineraryId) => {
+    setLikedItineraries(prev => {
+      const newLiked = new Set(prev);
+      if (newLiked.has(itineraryId)) {
+        newLiked.delete(itineraryId);
+      } else {
+        newLiked.add(itineraryId);
+      }
+      return newLiked;
+    });
   };
 
   if (editingItinerary) {
@@ -252,8 +265,34 @@ function ItineraryCard() {
                         </div>
                       )}
                     </div>
-                    <div className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                      Itinerary #{itinerary.tpid}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleLikeClick(itinerary.tpid)}
+                        className={`p-2 rounded-full transition-all duration-300 ${
+                          likedItineraries.has(itinerary.tpid)
+                            ? 'text-red-500 hover:text-red-600'
+                            : 'text-gray-400 hover:text-red-500'
+                        }`}
+                        title={likedItineraries.has(itinerary.tpid) ? 'Unlike' : 'Like'}
+                      >
+                        <svg
+                          className="w-6 h-6"
+                          fill={likedItineraries.has(itinerary.tpid) ? 'currentColor' : 'none'}
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                          />
+                        </svg>
+                      </button>
+                      <div className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                        Itinerary #{itinerary.tpid}
+                      </div>
                     </div>
                   </div>
                   
